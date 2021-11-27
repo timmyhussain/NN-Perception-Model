@@ -43,11 +43,11 @@ obstacles = np.array(object_poses)
 lidar_data = []
 pose_data = []
 i = 0
-while len(lidar_data) < 5000:
-    candidate = np.array([np.random.uniform(-50, 34), np.random.uniform(-43, 46)])
+while len(lidar_data) < 300:
+    candidate = np.array([np.random.uniform(-54, -47), np.random.uniform(-43, 46)])
     while np.isclose(candidate, obstacles, atol=7).all(axis=1).any():
         # print(candidate)
-        candidate = np.array([np.random.uniform(-50, 34), np.random.uniform(-43, 46)])
+        candidate = np.array([np.random.uniform(-54, -47), np.random.uniform(-43, 46)])
         # print(np.isclose(candidate, obstacles, atol=8).any())
     # print(candidate)
     

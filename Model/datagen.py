@@ -50,6 +50,16 @@ class Grid:
             self.grid[index[1], index[0]] = 1/len(ix.tolist())
         return self.grid
         
+    def get_orientation(self, x, y, tol, orientation):
+        self.grid = np.zeros((self.nx+1, self.ny+1))
+        ix = np.array(np.isclose(self.pseudo_grid, np.array([x, y]), atol=tol).all(axis=2).nonzero()).T
+        # print(ix.tolist())
+        
+        for index in ix.tolist():
+            # print(self.pseudo_grid[index[0], index[1]])
+            self.grid[index[1], index[0]] = orientation+2*np.pi
+        return self.grid
+        
     
 ################################
 #MAP 1
@@ -77,13 +87,13 @@ class Grid:
 
 #################################
 #Save map data
-
+# grid = Grid(10, 10, 10, -65.32, -53.20)
 # grid = Grid(50, 50, 2, -65.32, -53.20)
 
 # obstacles = np.load("../Maps/map1/obstacles.npy", allow_pickle=True)
 # grid.create_map(obstacles)
 # sns.heatmap(grid.grid)
-# np.save("../Maps/map1-new/map50_50.npy", obstacles, allow_pickle=True)
+# np.save("../Maps/map1-new/map_5050.npy", grid.grid, allow_pickle=True)
 
 
 ################################
@@ -97,8 +107,9 @@ grid = Grid(10, 10, 10, -65.32, -53.20)
 
 all_lidar_data = []
 all_occupancy_data = []
+all_orientation_data = []
 
-data_dirs = ["Data_10000/", "Data_5000/"]
+data_dirs = ["Data_300/", "Data_10000/", "Data_5000/"]
 for data_dir in data_dirs:
     lidar_data = np.load(data_dir + "Lidar_data.npy", allow_pickle=True)
     pose_data = np.load(data_dir + "Pose_data.npy", allow_pickle=True)
@@ -121,14 +132,20 @@ for data_dir in data_dirs:
             
             arr[df.index] = df.values
         occupancy = grid.get_occupancy(pose_data[i][0], pose_data[i][1], tol=grid.cell_size/2)
+        orientation = grid.get_orientation(pose_data[i][0], pose_data[i][1], tol=grid.cell_size/2, orientation=pose_data[i][2])
         
         all_lidar_data.append(arr)
         all_occupancy_data.append(occupancy)
-    print(len(all_lidar_data), len(all_occupancy_data))
-    
-    # plt.figure()
-    # sns.heatmap(occupancy)
+        all_orientation_data.append(orientation)
+    # print(len(all_lidar_data), len(all_occupancy_data))
 
 final_dir="Final_1010/"
-np.save(final_dir+"Lidar_data.npy", np.array(all_lidar_data), allow_pickle=True)
-np.save(final_dir+"Pose_data.npy", np.array(all_occupancy_data), allow_pickle=True)
+# np.save(final_dir+"Lidar_data.npy", np.array(all_lidar_data), allow_pickle=True)
+# np.save(final_dir+"Pose_data.npy", np.array(all_occupancy_data), allow_pickle=True)
+np.save(final_dir+"Orientation_data.npy", np.array(all_orientation_data), allow_pickle=True)
+
+# arr = np.array(all_occupancy_data)
+# plt.figure()
+# sns.heatmap(arr.sum(axis=0))
+# plt.title("Number of samples per cell of 10x10 grid")
+# plt.savefig("10x10.png")
